@@ -15,5 +15,5 @@ backend/.env
 Thumbs.db
 
 # Arquivos sensíveis frontend
-#frontend/src/api/client.js
-#frontend/src/api/socket.js
+frontend/src/api/client.js
+frontend/src/api/socket.js
