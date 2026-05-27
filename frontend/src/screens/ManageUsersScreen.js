@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Switch,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import apiClient from "../api/client";
 import { useAuthStore } from "../store/auth-store";
 
@@ -56,15 +57,13 @@ export default function ManageUsersScreen() {
     fetchUsers();
   }, []);
 
-  // Que cargos este utilizador pode gerir
   const getManageableRoles = () => {
-    if (isAdmin) return roles; // ADMIN gere todos
+    if (isAdmin) return roles;
     if (isManager)
-      return roles.filter((r) => r.key === "CHEF" || r.key === "WAITER"); // MANAGER só gere CHEF e WAITER
+      return roles.filter((r) => r.key === "CHEF" || r.key === "WAITER");
     return [];
   };
 
-  // Que utilizadores este utilizador pode ver
   const getVisibleUsers = () => {
     if (isAdmin) return users;
     if (isManager)
@@ -75,15 +74,13 @@ export default function ManageUsersScreen() {
     return [];
   };
 
-  // Pode editar este utilizador?
   const canEdit = (u) => {
-    if (u.id === currentUser?.id) return false; // Não pode editar-se a si próprio
+    if (u.id === currentUser?.id) return false;
     if (isAdmin) return true;
     if (isManager) return u.role === "CHEF" || u.role === "WAITER";
     return false;
   };
 
-  // Pode apagar este utilizador?
   const canDelete = (u) => {
     if (u.id === currentUser?.id) return false;
     if (isAdmin) return true;
@@ -91,7 +88,6 @@ export default function ManageUsersScreen() {
     return false;
   };
 
-  // Pode inativar este utilizador?
   const canToggle = (u) => {
     if (u.id === currentUser?.id) return false;
     if (isAdmin) return true;
@@ -268,14 +264,14 @@ export default function ManageUsersScreen() {
                 </View>
               </View>
 
-              {/* BOTÕES MODERNOS */}
+              {/* BOTÕES MODERNOS COM ÍCONES */}
               <View className="flex-row gap-2">
                 {canEdit(item) && (
                   <TouchableOpacity
                     className="w-9 h-9 rounded-full bg-blue-50 justify-center items-center border border-blue-200"
                     onPress={() => openEdit(item)}
                   >
-                    <Text className="text-blue-600 text-sm">✎</Text>
+                    <Ionicons name="create-outline" size={16} color="#3498db" />
                   </TouchableOpacity>
                 )}
                 {canDelete(item) && (
@@ -283,7 +279,7 @@ export default function ManageUsersScreen() {
                     className="w-9 h-9 rounded-full bg-red-50 justify-center items-center border border-red-200"
                     onPress={() => remove(item)}
                   >
-                    <Text className="text-red-500 text-sm">✕</Text>
+                    <Ionicons name="trash-outline" size={16} color="#e74c3c" />
                   </TouchableOpacity>
                 )}
               </View>

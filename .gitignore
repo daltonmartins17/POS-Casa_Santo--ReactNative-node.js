@@ -1,6 +1,19 @@
-node_modules/ 
-.env 
-.expo/ 
-*.jks 
-.DS_Store 
-Thumbs.db 
+# Dependências
+node_modules/
+
+# Variáveis de ambiente
+backend/.env
+
+# Expo
+.expo/
+
+# Android keys
+*.jks
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos sensíveis frontend
+frontend/src/api/client.js
+frontend/src/api/socket.js

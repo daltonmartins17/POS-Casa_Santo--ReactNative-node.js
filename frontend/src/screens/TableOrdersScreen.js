@@ -8,7 +8,9 @@ import {
   Alert,
   useWindowDimensions,
   TextInput,
+  Image,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import apiClient from "../api/client";
 
@@ -23,6 +25,8 @@ export default function TableOrdersScreen({ route, navigation }) {
   const [total, setTotal] = useState(0);
   const [editing, setEditing] = useState(null);
   const [editQty, setEditQty] = useState("");
+  const [paymentModal, setPaymentModal] = useState(null); // 'mbway', 'multibanco', 'dinheiro'
+  const [paymentStep, setPaymentStep] = useState(0);
 
   useEffect(() => {
     if (tableId) load();
@@ -110,14 +114,7 @@ export default function TableOrdersScreen({ route, navigation }) {
     }
   };
 
-  const pay = () =>
-    Alert.alert("💳 Pagamento", `Total: €${total.toFixed(2)}\n\nMétodo:`, [
-      { text: "Cancelar" },
-      { text: "💵 Dinheiro", onPress: () => processPay("Dinheiro") },
-      { text: "🏧 Multibanco", onPress: () => processPay("Multibanco") },
-      { text: "📱 MBWay", onPress: () => processPay("MBWay") },
-    ]);
-  const processPay = async (m) => {
+  const processPayment = async (method) => {
     try {
       for (const o of orders)
         await apiClient.patch(`/orders/${o.id}/status`, {
@@ -125,15 +122,26 @@ export default function TableOrdersScreen({ route, navigation }) {
         });
       await apiClient.patch(`/tables/${tableId}/status`, { status: "FREE" });
       queryClient.invalidateQueries(["tables"]);
+      setPaymentModal(null);
       Alert.alert(
         "✅ Pago!",
-        `Mesa ${tableNumber} paga com ${m}.\nTotal: €${total.toFixed(2)}`,
+        `Mesa ${tableNumber} paga com ${method}.\nTotal: €${total.toFixed(2)}`,
         [{ text: "OK", onPress: () => navigation.goBack() }],
       );
     } catch (e) {
       Alert.alert("Erro", "Falha.");
     }
   };
+
+  const pay = (method) => {
+    if (method === "Dinheiro") {
+      processPayment("Dinheiro");
+    } else {
+      setPaymentModal(method);
+      setPaymentStep(0);
+    }
+  };
+
   const freeTable = () =>
     Alert.alert(
       orders.length > 0
@@ -157,6 +165,13 @@ export default function TableOrdersScreen({ route, navigation }) {
         },
       ],
     );
+
+  // Gerar referência Multibanco simulada
+  const multibancoRef = {
+    entidade: "12345",
+    referencia: Math.floor(Math.random() * 900000000) + 100000000,
+    valor: total.toFixed(2),
+  };
 
   if (!tableId)
     return (
@@ -183,6 +198,7 @@ export default function TableOrdersScreen({ route, navigation }) {
 
   return (
     <View className="flex-1 bg-gray-50">
+      {/* Header */}
       <View className="bg-white px-5 py-4 flex-row justify-between items-center border-b-2 border-wood shadow-sm">
         <View className="flex-row items-center gap-3">
           <Text className="text-4xl">🪑</Text>
@@ -196,6 +212,8 @@ export default function TableOrdersScreen({ route, navigation }) {
           </View>
         </View>
       </View>
+
+      {/* Lista de itens */}
       <FlatList
         data={items}
         keyExtractor={(i) => i.pid.toString()}
@@ -247,12 +265,11 @@ export default function TableOrdersScreen({ route, navigation }) {
             <Text className="text-base text-gray-400 font-medium">
               Nenhum item
             </Text>
-            <Text className="text-sm text-gray-300 mt-1">
-              Toque em "Novo Pedido"
-            </Text>
           </View>
         }
       />
+
+      {/* Footer com ações */}
       <View className="absolute bottom-0 left-0 right-0 bg-white p-4 border-t-2 border-wood shadow-lg">
         {items.length > 0 && (
           <View className="flex-row justify-between items-center mb-3">
@@ -266,15 +283,33 @@ export default function TableOrdersScreen({ route, navigation }) {
         )}
         <View className="gap-2.5">
           {orders.length > 0 && (
-            <TouchableOpacity
-              className="bg-success rounded-2xl py-4 items-center shadow-md"
-              onPress={pay}
-              activeOpacity={0.8}
-            >
-              <Text className="text-white font-bold text-xl">
-                💳 Pagar €{total.toFixed(2)}
-              </Text>
-            </TouchableOpacity>
+            <View className="flex-row gap-2">
+              <TouchableOpacity
+                className="flex-1 bg-success rounded-xl py-3 items-center"
+                onPress={() => pay("Dinheiro")}
+                activeOpacity={0.8}
+              >
+                <Text className="text-white font-bold text-sm">
+                  💵 Dinheiro
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 bg-[#1a1a2e] rounded-xl py-3 items-center"
+                onPress={() => pay("Multibanco")}
+                activeOpacity={0.8}
+              >
+                <Text className="text-white font-bold text-sm">
+                  🏧 Multibanco
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 bg-[#9b59b6] rounded-xl py-3 items-center"
+                onPress={() => pay("MBWay")}
+                activeOpacity={0.8}
+              >
+                <Text className="text-white font-bold text-sm">📱 MBWay</Text>
+              </TouchableOpacity>
+            </View>
           )}
           <View className="flex-row gap-2.5">
             <TouchableOpacity
@@ -298,6 +333,8 @@ export default function TableOrdersScreen({ route, navigation }) {
           </View>
         </View>
       </View>
+
+      {/* Modal de Edição */}
       {editing && (
         <View className="absolute inset-0 bg-black/50 justify-center items-center z-50">
           <View className="bg-white rounded-2xl p-6 w-[85%] max-w-md">
@@ -320,7 +357,7 @@ export default function TableOrdersScreen({ route, navigation }) {
                   setEditQty(Math.max(0, parseInt(editQty) - 1).toString())
                 }
               >
-                <Text className="text-white font-bold text-xl">−</Text>
+                <Ionicons name="remove" size={20} color="#FFF" />
               </TouchableOpacity>
               <TextInput
                 className="w-16 h-10 border-2 border-primary rounded-lg text-center text-lg font-bold"
@@ -333,7 +370,7 @@ export default function TableOrdersScreen({ route, navigation }) {
                 className="w-10 h-10 rounded-full bg-primary justify-center items-center"
                 onPress={() => setEditQty((parseInt(editQty) + 1).toString())}
               >
-                <Text className="text-white font-bold text-xl">+</Text>
+                <Ionicons name="add" size={20} color="#FFF" />
               </TouchableOpacity>
             </View>
             {editQty !== editing.qty.toString() && (
@@ -355,6 +392,112 @@ export default function TableOrdersScreen({ route, navigation }) {
                 <Text className="text-white font-bold">Guardar</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      )}
+
+      {/* Modal de Pagamento MBWay / Multibanco */}
+      {paymentModal && (
+        <View className="absolute inset-0 bg-black/50 justify-center items-center z-50">
+          <View className="bg-white rounded-2xl p-6 w-[90%] max-w-md items-center">
+            <TouchableOpacity
+              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-gray-100 justify-center items-center"
+              onPress={() => setPaymentModal(null)}
+            >
+              <Ionicons name="close" size={20} color="#666" />
+            </TouchableOpacity>
+
+            {paymentModal === "MBWay" ? (
+              <>
+                <Text className="text-2xl font-bold text-[#9b59b6] mb-2">
+                  📱 MBWay
+                </Text>
+                <Text className="text-base text-gray-600 mb-4">
+                  Peça ao cliente para ler o QR Code
+                </Text>
+
+                {/* QR Code Simulado */}
+                <View className="bg-gray-100 rounded-2xl p-6 mb-4 items-center border-2 border-dashed border-[#9b59b6]">
+                  <View className="w-40 h-40 bg-white rounded-xl justify-center items-center">
+                    <Text className="text-5xl">📱</Text>
+                    <Text className="text-xs text-gray-400 mt-2">
+                      QR Code MBWay
+                    </Text>
+                  </View>
+                  <Text className="text-sm text-gray-500 mt-3 text-center">
+                    Simulação — Em produção, aqui apareceria{"\n"}o QR Code real
+                    do MBWay
+                  </Text>
+                </View>
+
+                <Text className="text-lg font-bold text-primary mb-2">
+                  €{total.toFixed(2)}
+                </Text>
+                <Text className="text-xs text-gray-400 mb-4">
+                  Valor a pagar
+                </Text>
+
+                <TouchableOpacity
+                  className="w-full bg-[#9b59b6] rounded-xl py-3 items-center"
+                  onPress={() => processPayment("MBWay")}
+                >
+                  <Text className="text-white font-bold text-lg">
+                    Confirmar Pagamento MBWay
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <Text className="text-2xl font-bold text-[#1a1a2e] mb-2">
+                  🏧 Multibanco
+                </Text>
+                <Text className="text-base text-gray-600 mb-4">
+                  Dados para pagamento
+                </Text>
+
+                {/* Referência Multibanco */}
+                <View className="bg-gray-100 rounded-2xl p-6 mb-4 w-full items-center border-2 border-dashed border-[#1a1a2e]">
+                  <View className="flex-row justify-between w-full mb-2">
+                    <Text className="text-sm text-gray-500">Entidade</Text>
+                    <Text className="text-sm font-bold text-gray-800">
+                      {multibancoRef.entidade}
+                    </Text>
+                  </View>
+                  <View className="flex-row justify-between w-full mb-2">
+                    <Text className="text-sm text-gray-500">Referência</Text>
+                    <Text className="text-sm font-bold text-gray-800">
+                      {multibancoRef.referencia}
+                    </Text>
+                  </View>
+                  <View className="flex-row justify-between w-full">
+                    <Text className="text-sm text-gray-500">Valor</Text>
+                    <Text className="text-sm font-bold text-gray-800">
+                      €{multibancoRef.valor}
+                    </Text>
+                  </View>
+                  <Text className="text-xs text-gray-400 mt-3 text-center">
+                    Simulação — Em produção, esta referência{"\n"}seria gerada
+                    pela SIBS
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  className="w-full bg-[#1a1a2e] rounded-xl py-3 items-center"
+                  onPress={() => processPayment("Multibanco")}
+                >
+                  <Text className="text-white font-bold text-lg">
+                    Confirmar Pagamento Multibanco
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            <TouchableOpacity
+              className="mt-3 py-2"
+              onPress={() => setPaymentModal(null)}
+            >
+              <Text className="text-gray-500 text-sm">Cancelar</Text>
+            </TouchableOpacity>
           </View>
         </View>
       )}

@@ -12,6 +12,7 @@ import {
   Platform,
 } from "react-native";
 import { useMenu, useCreateOrder } from "../api/hooks";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function OrderScreen({ route, navigation }) {
   const { tableId, tableNumber } = route.params;
@@ -79,10 +80,8 @@ export default function OrderScreen({ route, navigation }) {
       { text: "Limpar", style: "destructive", onPress: () => setCart([]) },
     ]);
   };
-
   const totalPrice = cart.reduce((s, i) => s + i.price * i.quantity, 0);
   const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
-
   const sendOrder = async () => {
     if (cart.length === 0) {
       Alert.alert("Vazio", "Adicione itens.");
@@ -117,7 +116,6 @@ export default function OrderScreen({ route, navigation }) {
       ],
     );
   };
-
   const displayed = selectedCategory
     ? categories.find((c) => c.id === selectedCategory)?.products || []
     : [];
@@ -140,25 +138,42 @@ export default function OrderScreen({ route, navigation }) {
       <View className={`flex-1 gap-2 ${isLandscape ? "flex-row" : "flex-col"}`}>
         {/* Menu */}
         <View className="flex-1">
+          {/* Categorias - SCROLLVIEW simples sem contentContainerStyle problemático */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="mb-2"
+            style={{ flexGrow: 0, marginBottom: 8 }}
           >
-            {categories.map((c) => (
-              <TouchableOpacity
-                key={c.id}
-                className={`px-4 py-2 rounded-full mr-2 ${selectedCategory === c.id ? "bg-primary" : "bg-gray-100"}`}
-                onPress={() => setSelectedCategory(c.id)}
-              >
-                <Text
-                  className={`text-sm font-semibold ${selectedCategory === c.id ? "text-white" : "text-gray-500"}`}
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            >
+              {categories.map((c) => (
+                <TouchableOpacity
+                  key={c.id}
+                  style={{
+                    height: 36,
+                    paddingHorizontal: 16,
+                    borderRadius: 20,
+                    justifyContent: "center",
+                    backgroundColor:
+                      selectedCategory === c.id ? "#0A2342" : "#f0f0f0",
+                  }}
+                  onPress={() => setSelectedCategory(c.id)}
                 >
-                  {c.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "600",
+                      color: selectedCategory === c.id ? "#FFF" : "#666",
+                    }}
+                  >
+                    {c.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </ScrollView>
+
           <FlatList
             data={displayed}
             keyExtractor={(i) => i.id.toString()}
@@ -188,6 +203,7 @@ export default function OrderScreen({ route, navigation }) {
             }
           />
         </View>
+
         {/* Carrinho */}
         <View
           className={`bg-gray-50 rounded-xl p-3 border border-gray-200 ${isLandscape ? "w-[340px]" : "flex-1 mt-2"}`}
@@ -198,12 +214,10 @@ export default function OrderScreen({ route, navigation }) {
             </Text>
             {cart.length > 0 && (
               <TouchableOpacity
-                className="px-2.5 py-1 rounded-md bg-red-50"
+                className="w-8 h-8 rounded-full bg-red-50 justify-center items-center border border-red-200"
                 onPress={clearCart}
               >
-                <Text className="text-danger font-semibold text-xs">
-                  🗑️ Limpar
-                </Text>
+                <Ionicons name="trash-outline" size={16} color="#e74c3c" />
               </TouchableOpacity>
             )}
           </View>
@@ -222,26 +236,32 @@ export default function OrderScreen({ route, navigation }) {
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-1">
+                  {/* Botão - */}
                   <TouchableOpacity
-                    className="w-7 h-7 rounded-lg bg-primary justify-center items-center"
+                    className="w-7 h-7 rounded-full bg-blue-50 justify-center items-center border border-blue-200"
                     onPress={() => decrease(item.productId)}
                   >
-                    <Text className="text-white font-bold">−</Text>
+                    <Ionicons name="remove" size={14} color="#3498db" />
                   </TouchableOpacity>
-                  <Text className="font-bold text-sm text-text-primary">
+                  <Text
+                    className="font-bold text-sm text-text-primary"
+                    style={{ minWidth: 20, textAlign: "center" }}
+                  >
                     {item.quantity}
                   </Text>
+                  {/* Botão + */}
                   <TouchableOpacity
-                    className="w-7 h-7 rounded-lg bg-primary justify-center items-center"
+                    className="w-7 h-7 rounded-full bg-blue-50 justify-center items-center border border-blue-200"
                     onPress={() => increase(item.productId)}
                   >
-                    <Text className="text-white font-bold">+</Text>
+                    <Ionicons name="add" size={14} color="#3498db" />
                   </TouchableOpacity>
+                  {/* Botão lixo */}
                   <TouchableOpacity
-                    className="w-7 h-7 rounded-lg bg-red-50 justify-center items-center"
+                    className="w-7 h-7 rounded-full bg-red-50 justify-center items-center border border-red-200"
                     onPress={() => removeFromCart(item.productId)}
                   >
-                    <Text>🗑️</Text>
+                    <Ionicons name="trash-outline" size={14} color="#e74c3c" />
                   </TouchableOpacity>
                 </View>
                 <Text className="text-sm font-bold text-secondary w-12 text-right">

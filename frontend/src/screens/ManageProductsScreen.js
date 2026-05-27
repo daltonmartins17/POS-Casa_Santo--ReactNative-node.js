@@ -10,6 +10,7 @@ import {
   useWindowDimensions,
   ScrollView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useMenu } from "../api/hooks";
 import apiClient from "../api/client";
 
@@ -81,7 +82,7 @@ export default function ManageProductsScreen() {
       Alert.alert("Erro", e.response?.data?.error || "Falha.");
     }
   };
-  const remove = (p) => {
+  const remove = (p) =>
     Alert.alert("Remover", `Remover "${p.name}"?`, [
       { text: "Cancelar" },
       {
@@ -97,7 +98,6 @@ export default function ManageProductsScreen() {
         },
       },
     ]);
-  };
 
   return (
     <View className="flex-1 bg-white p-4">
@@ -108,23 +108,27 @@ export default function ManageProductsScreen() {
           📦 Gestão de Produtos
         </Text>
         <TouchableOpacity
-          className="bg-primary rounded-xl px-6 py-3"
+          className="bg-primary rounded-xl px-6 py-3 shadow-md"
           onPress={() => openAdd()}
         >
           <Text className="text-white font-bold">+ Novo Produto</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Filtro por categoria - TODOS COM MESMO TAMANHO */}
+      {/* Filtros - TAMANHO FIXO */}
       <View className="mb-4">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 8, paddingRight: 16 }}
+          contentContainerStyle={{
+            gap: 8,
+            paddingRight: 16,
+            alignItems: "center",
+          }}
           style={{ flexGrow: 0 }}
         >
           <TouchableOpacity
-            className={`px-5 py-2.5 rounded-full ${!selCat ? "bg-primary" : "bg-gray-100"}`}
+            className={`h-9 px-5 rounded-full justify-center ${!selCat ? "bg-primary" : "bg-gray-100"}`}
             onPress={() => setSelCat(null)}
           >
             <Text
@@ -136,7 +140,7 @@ export default function ManageProductsScreen() {
           {cats.map((c) => (
             <TouchableOpacity
               key={c.id}
-              className={`px-5 py-2.5 rounded-full ${selCat === c.id ? "bg-primary" : "bg-gray-100"}`}
+              className={`h-9 px-5 rounded-full justify-center ${selCat === c.id ? "bg-primary" : "bg-gray-100"}`}
               onPress={() => setSelCat(c.id)}
             >
               <Text
@@ -172,28 +176,27 @@ export default function ManageProductsScreen() {
             </View>
             <View className="flex-row gap-2">
               <TouchableOpacity
-                className="w-10 h-10 rounded-lg bg-primary justify-center items-center"
+                className="w-9 h-9 rounded-full bg-blue-50 justify-center items-center border border-blue-200"
                 onPress={() => openEdit(item)}
               >
-                <Text className="text-white text-lg">✏️</Text>
+                <Ionicons name="create-outline" size={16} color="#3498db" />
               </TouchableOpacity>
               <TouchableOpacity
-                className="w-10 h-10 rounded-lg bg-danger justify-center items-center"
+                className="w-9 h-9 rounded-full bg-red-50 justify-center items-center border border-red-200"
                 onPress={() => remove(item)}
               >
-                <Text className="text-white text-lg">🗑️</Text>
+                <Ionicons name="trash-outline" size={16} color="#e74c3c" />
               </TouchableOpacity>
             </View>
           </View>
         )}
         ListEmptyComponent={
           <Text className="text-center text-gray-400 mt-10">
-            Nenhum produto encontrado.
+            Nenhum produto.
           </Text>
         }
       />
 
-      {/* Modal */}
       <Modal
         animationType="slide"
         transparent
@@ -211,9 +214,8 @@ export default function ManageProductsScreen() {
               <Text className="text-xl font-bold text-primary mb-5 text-center">
                 {isEdit ? "✏️ Editar Produto" : "➕ Novo Produto"}
               </Text>
-
               <Text className="text-sm font-semibold text-gray-700 mb-1.5">
-                Nome do Produto *
+                Nome *
               </Text>
               <TextInput
                 className="bg-gray-100 rounded-lg p-3 text-base mb-4 border border-gray-300"
@@ -221,7 +223,6 @@ export default function ManageProductsScreen() {
                 value={name}
                 onChangeText={setName}
               />
-
               <Text className="text-sm font-semibold text-gray-700 mb-1.5">
                 Preço (€) *
               </Text>
@@ -232,7 +233,6 @@ export default function ManageProductsScreen() {
                 onChangeText={setPrice}
                 keyboardType="decimal-pad"
               />
-
               <Text className="text-sm font-semibold text-gray-700 mb-1.5">
                 Categoria *
               </Text>
@@ -251,20 +251,18 @@ export default function ManageProductsScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-
               <Text className="text-sm font-semibold text-gray-700 mb-1.5">
                 Descrição (opcional)
               </Text>
               <TextInput
                 className="bg-gray-100 rounded-lg p-3 text-base mb-4 border border-gray-300 min-h-[80px]"
-                placeholder="Descrição do produto..."
+                placeholder="Descrição..."
                 value={desc}
                 onChangeText={setDesc}
                 multiline
                 numberOfLines={3}
                 textAlignVertical="top"
               />
-
               <View className="flex-row justify-between gap-3">
                 <TouchableOpacity
                   className="flex-1 p-3 rounded-lg bg-gray-400 items-center"

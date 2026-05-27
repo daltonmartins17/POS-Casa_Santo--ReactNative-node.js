@@ -10,6 +10,7 @@ import {
   useWindowDimensions,
   ScrollView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useTables } from "../api/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import apiClient from "../api/client";
@@ -109,7 +110,7 @@ export default function ManageTablesScreen() {
       >
         <Text className="text-2xl font-bold text-primary">Gestão de Mesas</Text>
         <TouchableOpacity
-          className="bg-primary rounded-xl px-6 py-3"
+          className="bg-primary rounded-xl px-6 py-3 shadow-md"
           onPress={openAdd}
         >
           <Text className="text-white font-bold">+ Nova Mesa</Text>
@@ -156,16 +157,16 @@ export default function ManageTablesScreen() {
                   </TouchableOpacity>
                 ))}
                 <TouchableOpacity
-                  className="px-2.5 py-1.5 rounded-md bg-primary"
+                  className="w-9 h-9 rounded-full bg-blue-50 justify-center items-center border border-blue-200"
                   onPress={() => openEdit(item)}
                 >
-                  <Text className="text-white text-xs">✏️</Text>
+                  <Ionicons name="create-outline" size={16} color="#3498db" />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="px-2.5 py-1.5 rounded-md bg-red-700"
+                  className="w-9 h-9 rounded-full bg-red-50 justify-center items-center border border-red-200"
                   onPress={() => remove(item)}
                 >
-                  <Text className="text-white text-xs">🗑️</Text>
+                  <Ionicons name="trash-outline" size={16} color="#e74c3c" />
                 </TouchableOpacity>
               </View>
             </ScrollView>
