@@ -5,6 +5,7 @@ import {
   Text,
   View,
   useWindowDimensions,
+  ScrollView,
 } from "react-native";
 import { useAuthStore } from "../store/auth-store";
 import LoginScreen from "../screens/LoginScreen";
@@ -97,7 +98,8 @@ function StaffNavigator() {
   const { user } = useAuthStore();
   const { width } = useWindowDimensions();
   const isSmallScreen = width < 500;
-  const fontSize = isSmallScreen ? 12 : 14;
+  const fontSize = isSmallScreen ? 11 : 13;
+  const buttonSpacing = isSmallScreen ? 6 : 8;
 
   return (
     <Stack.Navigator
@@ -116,52 +118,123 @@ function StaffNavigator() {
           headerRight: () => <LogoutButton />,
           headerLeft: () => (
             <View
-              style={{ flexDirection: "row", marginLeft: 8, flexWrap: "wrap" }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                flex: 1,
+                marginRight: 60, // Dá espaço para o botão Sair
+              }}
             >
-              {(user.role === "ADMIN" || user.role === "MANAGER") && (
-                <>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("Kitchen")}
-                    style={{ marginRight: 10, marginVertical: 4 }}
-                  >
-                    <Text
-                      style={{ color: "#FFF", fontWeight: "bold", fontSize }}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{
+                  flex: 1,
+                }}
+                contentContainerStyle={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+                scrollEnabled={true}
+                bounces={true}
+                showsVerticalScrollIndicator={false}
+              >
+                {(user.role === "ADMIN" || user.role === "MANAGER") && (
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("Kitchen")}
+                      style={{
+                        marginRight: buttonSpacing,
+                        paddingVertical: 6,
+                        paddingHorizontal: 4,
+                        minHeight: 40,
+                        justifyContent: "center",
+                      }}
                     >
-                      🍳 Cozinha
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("Admin")}
-                    style={{ marginRight: 10, marginVertical: 4 }}
-                  >
-                    <Text
-                      style={{ color: "#FFF", fontWeight: "bold", fontSize }}
+                      <Text
+                        style={{
+                          color: "#FFF",
+                          fontWeight: "bold",
+                          fontSize,
+                          includeFontPadding: false,
+                        }}
+                        numberOfLines={1}
+                        allowFontScaling={true}
+                      >
+                        🍳 Cozinha
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("Admin")}
+                      style={{
+                        marginRight: buttonSpacing,
+                        paddingVertical: 6,
+                        paddingHorizontal: 4,
+                        minHeight: 40,
+                        justifyContent: "center",
+                      }}
                     >
-                      📊 Dashboard
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("ManageUsers")}
-                    style={{ marginRight: 10, marginVertical: 4 }}
-                  >
-                    <Text
-                      style={{ color: "#FFF", fontWeight: "bold", fontSize }}
+                      <Text
+                        style={{
+                          color: "#FFF",
+                          fontWeight: "bold",
+                          fontSize,
+                          includeFontPadding: false,
+                        }}
+                        numberOfLines={1}
+                        allowFontScaling={true}
+                      >
+                        📊 Dashboard
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("ManageUsers")}
+                      style={{
+                        marginRight: buttonSpacing,
+                        paddingVertical: 6,
+                        paddingHorizontal: 4,
+                        minHeight: 40,
+                        justifyContent: "center",
+                      }}
                     >
-                      👥 Utilizadores
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("ManageProducts")}
-                    style={{ marginRight: 10, marginVertical: 4 }}
-                  >
-                    <Text
-                      style={{ color: "#FFF", fontWeight: "bold", fontSize }}
+                      <Text
+                        style={{
+                          color: "#FFF",
+                          fontWeight: "bold",
+                          fontSize,
+                          includeFontPadding: false,
+                        }}
+                        numberOfLines={1}
+                        allowFontScaling={true}
+                      >
+                        👥 Utilizadores
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("ManageProducts")}
+                      style={{
+                        paddingVertical: 6,
+                        paddingHorizontal: 4,
+                        minHeight: 40,
+                        justifyContent: "center",
+                      }}
                     >
-                      📦 Produtos
-                    </Text>
-                  </TouchableOpacity>
-                </>
-              )}
+                      <Text
+                        style={{
+                          color: "#FFF",
+                          fontWeight: "bold",
+                          fontSize,
+                          includeFontPadding: false,
+                        }}
+                        numberOfLines={1}
+                        allowFontScaling={true}
+                      >
+                        📦 Produtos
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </ScrollView>
             </View>
           ),
         })}
